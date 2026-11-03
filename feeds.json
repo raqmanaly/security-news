@@ -144,13 +144,56 @@
     "type": "Regional",
     "lang": "en",
     "enabled": true,
-    "region": "Libya",
     "tier": "Local Incident / Breaking News",
     "focus": "Official state wire announcements and telecom alert updates.",
     "require_any": [
       "cyber"
     ],
-    "note": "Official state news agency, English feed (an Arabic feed exists at /rss/ar/; one language only, to avoid duplicates). General news, so only cyber items are kept."
+    "note": "Official state news agency, English feed. General news, so only cyber items are kept; it also reports world news, so the region comes from the headline (Libya when it names Libya, a Libyan city or 'Libyan')."
+  },
+  {
+    "id": "lana_state_wire_ar",
+    "name": "LANA (Arabic)",
+    "url": "https://lana.gov.ly/rss/ar/",
+    "type": "Regional",
+    "lang": "ar",
+    "enabled": true,
+    "tier": "Local Incident / Breaking News",
+    "focus": "Official state wire, Arabic edition (more items than the English feed).",
+    "require_any": [
+      "cyber"
+    ],
+    "note": "Arabic feed of the state news agency (25 items, about a day of news). Only cyber items are kept; the region comes from the headline, as for the English feed."
+  },
+  {
+    "id": "libya_review",
+    "name": "Libya Review",
+    "url": "https://libyareview.com/feed/",
+    "type": "Regional",
+    "lang": "en",
+    "enabled": true,
+    "region": "Libya",
+    "tier": "Local Incident / Breaking News",
+    "focus": "Libyan general news (English).",
+    "require_any": [
+      "cyber"
+    ],
+    "note": "Libyan general news (English); only cybersecurity items are kept."
+  },
+  {
+    "id": "libya_update",
+    "name": "Libya Update",
+    "url": "https://libyaupdate.com/feed/",
+    "type": "Regional",
+    "lang": "en",
+    "enabled": true,
+    "region": "Libya",
+    "tier": "Local Incident / Breaking News",
+    "focus": "Libyan general news (English).",
+    "require_any": [
+      "cyber"
+    ],
+    "note": "Libyan general news (English); only cybersecurity items are kept."
   },
   {
     "id": "security_dot_com_cti",
@@ -199,6 +242,79 @@
       "press_release"
     ],
     "note": "Site-wide NETSCOUT feed (mostly product marketing), so only threat items are kept. The per-country DDoS statistics (Cyber Threat Horizon) are a dashboard, not a feed, and cannot be ingested."
+  },
+  {
+    "id": "socradar",
+    "name": "SOCRadar",
+    "url": "https://socradar.io/feed/",
+    "type": "Industry",
+    "lang": "en",
+    "enabled": true,
+    "tier": "Tactical Threat Intelligence",
+    "focus": "Daily threat intelligence: dark-web leaks, ransomware claims, zero-days.",
+    "require_any": [
+      "threat"
+    ],
+    "exclude_any": [
+      "press_release"
+    ],
+    "note": "Raqmana partner. SOCRadar blog (threat news, several posts a day); product posts are dropped by the threat gate."
+  },
+  {
+    "id": "kaspersky_securelist",
+    "name": "Kaspersky Securelist",
+    "url": "https://securelist.com/feed/",
+    "type": "Industry",
+    "lang": "en",
+    "enabled": true,
+    "tier": "Tactical Threat Intelligence",
+    "focus": "Kaspersky GReAT research: APT campaigns and malware analysis.",
+    "note": "Raqmana partner. Kaspersky's research blog (not the consumer blog at kaspersky.com/blog)."
+  },
+  {
+    "id": "tenable_blog",
+    "name": "Tenable",
+    "url": "https://www.tenable.com/blog/feed",
+    "type": "Industry",
+    "lang": "en",
+    "enabled": true,
+    "tier": "Tactical Threat Intelligence",
+    "focus": "Vulnerability research and exposure management.",
+    "require_any": [
+      "threat"
+    ],
+    "exclude_any": [
+      "press_release"
+    ],
+    "note": "Raqmana partner. Tenable blog; product and event posts are dropped by the threat gate."
+  },
+  {
+    "id": "forescout_blog",
+    "name": "Forescout",
+    "url": "https://www.forescout.com/feed/",
+    "type": "Industry",
+    "lang": "en",
+    "enabled": true,
+    "tier": "Tactical Threat Intelligence",
+    "focus": "Vedere Labs research: OT, IoT and exposed critical systems.",
+    "require_any": [
+      "threat"
+    ],
+    "exclude_any": [
+      "press_release"
+    ],
+    "note": "Raqmana partner. Site-wide feed (research and marketing), so only threat items are kept."
+  },
+  {
+    "id": "trend_zdi",
+    "name": "Zero Day Initiative (Trend Micro)",
+    "url": "https://www.zerodayinitiative.com/blog?format=rss",
+    "type": "Industry",
+    "lang": "en",
+    "enabled": true,
+    "tier": "Tactical Threat Intelligence",
+    "focus": "Trend Micro's vulnerability research programme: Patch Tuesday reviews, Pwn2Own, exploit write-ups.",
+    "note": "Raqmana partner (Trend Micro). trendmicro.com/research has no feed and the newsroom feed is press releases; the ZDI blog is Trend Micro's research feed."
   },
   {
     "id": "gia_gov_frameworks",

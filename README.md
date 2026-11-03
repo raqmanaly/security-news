@@ -46,6 +46,9 @@ Run the tests after you change it.
 ## What the pipeline does on each run
 
 1. Fetches each feed with conditional GET (cached in `state.json`), applies the feed's filters, and keeps the newest 15 stories per feed.
+   Feeds with `require_any` (general news, trade press) also remember their matches in `state.json` (up to 40 per feed)
+   until they pass the 60-day cap: a busy outlet such as Libya Herald pushes a rare cyber story out of its feed within
+   hours, and without this memory the story would vanish from the page at the next run.
 2. Drops stories older than 60 days.
 3. Merges duplicates: the same link, a near-identical headline, or the same CVE ID.
 4. Flags stories naming a CVE on CISA's Known Exploited Vulnerabilities list (`kev: true`).

@@ -332,3 +332,38 @@ def test_official_feed_goes_to_its_own_list_without_age_cap(tagger):
     assert [o["title"] for o in news["official"]] == [f"NISSA post {n}" for n in (7, 6, 5, 4, 3)]   # newest 5, 2024 kept
     assert set(news["official"][0]) == {"title", "url", "source", "lang", "published", "date_estimated"}
     assert "NISSA" in news["sources_ok"]
+
+
+def test_filtered_feed_remembers_matches_after_they_leave_the_feed(tagger, filt):
+    """A busy general-news feed pushes a rare cyber story out of its newest items within hours: it stays until the age cap."""
+    feed = dict(_feeds(1)[0], region="Libya", require_any=["cyber"])
+    old_match = _item("Bank warns of fake pages impersonating it", "https://ly.example/fake-pages", "F0", "2026-10-12T09:00:00Z")
+    expired = _item("Hackers hit ministry site", "https://ly.example/expired", "F0", "2026-08-01T09:00:00Z")
+    not_cyber = _item("Ministers discuss roads", "https://ly.example/roads", "F0", "2026-10-15T09:00:00Z")   # filters changed since
+    rss = """<rss version="2.0"><channel><title>LY</title>
+<item><title>Ministers meet in Tripoli</title><link>https://ly.example/meet</link><pubDate>Sun, 19 Oct 2026 08:00:00 GMT</pubDate></item>
+<item><title>Phishing campaign targets bank customers</title><link>https://ly.example/phish</link><pubDate>Sun, 19 Oct 2026 07:00:00 GMT</pubDate></item>
+</channel></rss>"""
+    state = {feed["url"]: {"etag": None, "last_modified": None, "items": [], "kept": [old_match, expired, not_cyber]}}
+    news, new_state, *_ = fn.run([feed], tagger, state, _FakeSession({feed["url"]: (200, rss.encode())}), NOW, filt)
+    assert [i["title"] for i in news["items"]] == ["Phishing campaign targets bank customers", "Bank warns of fake pages impersonating it"]
+    assert all(i["region"] == "Libya" for i in news["items"])
+    kept = [i["title"] for i in new_state[feed["url"]]["kept"]]
+    assert "Hackers hit ministry site" not in kept and kept[:2] == ["Phishing campaign targets bank customers", "Bank warns of fake pages impersonating it"]
+
+
+def test_unfiltered_feeds_keep_no_memory(tagger):
+    feed = _feeds(1)[0]
+    news, new_state, *_ = fn.run([feed], tagger, {}, _FakeSession({feed["url"]: (200, RSS.encode())}), NOW)
+    assert "kept" not in new_state[feed["url"]]
+
+
+@pytest.mark.parametrize("title, keep", [
+    ("الاتحاد الأوروبي يواجه هجمات إلكترونية تستهدف أنظمة التبريد", True),
+    ("ضبط متهم في قضية ابتزاز إلكتروني بطرابلس", True),
+    ("إدارة مكافحة الجرائم الإلكترونية تحذر المواطنين", True),
+    ("المصرف يطلق خدمة الدفع الإلكتروني", False),        # e-payment is not a cyber story
+])
+def test_cyber_gate_arabic_electronic_phrasing(filt, title, keep):
+    feed = dict(FEED, require_any=["cyber"], lang="ar")
+    assert filt.keep(_item(title, "https://ly.example/x", "LANA", "2026-10-18T10:00:00Z"), feed) is keep

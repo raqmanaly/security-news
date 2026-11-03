@@ -37,6 +37,7 @@ MAX_BYTES = 15_000_000   # a feed larger than this is refused (CISA embeds full 
 PER_FEED = 15            # newest items kept per feed
 MAX_ITEMS = 80           # items in news.json
 MAX_AGE_DAYS = 60        # older stories are dropped, however few remain
+KEPT_PER_FEED = 40       # matches a filtered feed remembers (see run)
 OFFICIAL_ITEMS = 5       # latest posts kept from 'official' feeds (no age cap; shown apart from the news)
 EXCERPT_WORDS = 30
 TITLE_SIMILARITY = 0.9   # difflib ratio at or above which two headlines are the same story
@@ -437,6 +438,7 @@ def dedupe(items):
 def run(feeds, tagger, state, session, now, filt=ALLOW_ALL, kev=frozenset()):
     enabled = [f for f in feeds if f.get("enabled")]
     ok, failed, items, official, new_state, how = [], [], [], [], {}, {}
+    cutoff = iso(now - timedelta(days=MAX_AGE_DAYS))
     for feed in enabled:
         try:
             got, entry, how[feed["name"]] = fetch_feed(session, feed, state.get(feed["url"], {}), now, tagger, filt)
@@ -448,6 +450,14 @@ def run(feeds, tagger, state, session, now, filt=ALLOW_ALL, kev=frozenset()):
             continue
         ok.append(feed["name"])
         new_state[feed["url"]] = entry
+        # A filtered feed (general news, trade press) rarely carries a matching story, and a busy feed pushes it
+        # out of its newest items within hours. So its matches are remembered until they pass the age cap.
+        if feed.get("require_any") and not feed.get("official"):
+            kept = {i["id"]: i for i in state.get(feed["url"], {}).get("kept", [])}
+            kept.update((i["id"], i) for i in got)
+            got = sorted((i for i in kept.values() if i["published"] >= cutoff and filt.keep(i, feed)),
+                         key=lambda i: i["published"], reverse=True)[:KEPT_PER_FEED]
+            new_state[feed["url"]] = dict(entry, kept=got)
         # Official sources (e.g. NISSA) are not news: their latest posts form a separate, dated list
         if feed.get("official"):
             official += [{k: i[k] for k in ("title", "url", "source", "lang", "published", "date_estimated")}
@@ -460,7 +470,6 @@ def run(feeds, tagger, state, session, now, filt=ALLOW_ALL, kev=frozenset()):
             item["region"] = feed.get("region") or tagger.tag(item["title"], item["excerpt"])
             if filt.keep(item, feed):
                 items.append(item)
-    cutoff = iso(now - timedelta(days=MAX_AGE_DAYS))
     merged = [i for i in dedupe(items) if i["published"] >= cutoff]
     for item in merged:   # on CISA's Known Exploited Vulnerabilities list
         item["kev"] = bool(kev & set(item["cves"]))

@@ -26,10 +26,11 @@ Pipeline behind the raqmana.ly news pages: `fetch_news.py` → `site/news.json` 
 ### Sources
 - Don't add or enable a source without the owner's OK.
 - Proposed but not enabled:
-  - SOCRadar
-  - Kaspersky Securelist
   - Cybercast (Arabic)
   - AITNews (Arabic)
-  - Central Bank of Libya `cbl.gov.ly/feed/`
-  - Libya Herald
-  - NISSA `nissa.gov.ly/feed/`. Its newest post is from 2024; enable it only with the 60-day age cap, which applies anyway.
+  - Google News search feeds for Libya + cyber terms (English and Arabic). They reach Libyan outlets without feeds
+    (The Libya Observer, Al Wasat), but links go through Google redirects and Google's terms for these feeds are
+    aimed at personal use. The owner has not decided.
+- Partner feeds checked 2026-11-03 and left out: SolarWinds, Matrix42, SealPath, DataPatrol, dPhish (product
+  marketing), Thinkst Canary (rarely posts); no feed at all: CyberVergent, WhiteGuard, Cyber Crucible, Forcepoint,
+  Segura, Albaraka Insurance (not security news).
